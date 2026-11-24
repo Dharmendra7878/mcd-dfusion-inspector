@@ -1,69 +1,110 @@
 # MCD-DFusion — Multimodal Sentiment & Consistency Inspector
 
-A full-stack research and inspection prototype inspired by **Associate Professor 张留美 (Liumei Zhang)**'s research on multimodal sentiment analysis (including **MCD-DFusion**), built to inspect sentiment consistency across modalities (captions, OCR text, emojis, and image mood), evaluate conflict / low-MCD cases, test perturbation robustness, and save experiment records.
+A full-stack research and inspection prototype that analyzes sentiment consistency across modalities (captions, OCR text, emojis, and image mood), inspects conflict / low-MCD cases, tests perturbation robustness, and persists experiment records. Built with React + Vite, Node.js, Python, and MongoDB Atlas.
 
----
+## Academic Reference & Inspiration
+
+This project is a practical research prototype inspired by **Associate Professor 张留美 (Liumei Zhang)**'s research on multimodal sentiment analysis, including **MCD-DFusion**.
+
+> **Note:** This application translates core research ideas around cross-modal consistency, conflict inspection, and perturbation analysis into an interactive cloud-deployed web prototype.
 
 ## System Architecture
 
-* **Frontend (`frontend/`)**: React + Vite web application deployed on **Vercel**
-* **Backend API (`backend/`)**: Node.js REST API (`server.js`) deployed on **Render**, connected to **MongoDB Atlas** (`Cluster0`) for storing experiment history
-* **AI Service (`ai-service/`)**: Python service deployed on **Render** exposing multimodal analysis endpoints (such as `/analyze`)
+The application uses a decoupled multi-service architecture across cloud hosting and database layers:
 
----
+| Component | Tech Stack | Hosting | Purpose |
+| :--- | :--- | :--- | :--- |
+| **Frontend** | React, Vite, JavaScript | Vercel | Interactive multimodal inspector dashboard and experiment viewer |
+| **Backend API** | Node.js, Express, MongoDB | Render | REST API and experiment history storage in MongoDB Atlas |
+| **AI Service** | Python | Render | Multimodal analysis service exposing `/analyze` |
 
-## Live Deployment URLs
+## Live Deployment
 
-* **Frontend (Vercel)**: `https://mcd-dfusion-inspector.vercel.app/`
-* **Backend API (Render)**: `https://mcd-dfusion-api.onrender.com`
-* **AI Service (Render)**: `https://mcd-dfusion-ai.onrender.com`
+* **Frontend**: `https://mcd-dfusion-inspector.vercel.app/`
+* **Backend API**: `https://mcd-dfusion-api.onrender.com`
+* **AI Service**: `https://mcd-dfusion-ai.onrender.com`
 
----
+## Key Features
+
+* **Cross-Modal Consistency Inspection**: Evaluates sentiment alignment across captions, OCR text, emojis, and image mood.
+* **Conflict & Perturbation Analysis**: Highlights low-MCD / conflicting cases and lets you test how outputs respond under perturbations.
+* **Persistent Experiment History**: Saves analyzed runs to MongoDB Atlas so past experiments can be reviewed and filtered.
+* **Cloud Deployment Ready**: Configured across Vercel, Render, and MongoDB Atlas.
 
 ## Project Structure
 
 ```text
 mcd-dfusion-inspector/
-├── frontend/     # React + Vite inspector dashboard
-├── backend/      # Node.js API server & MongoDB persistence
-└── ai-service/   # Python multimodal analysis service
+├── frontend/                  # React + Vite web application
+├── backend/                   # Node.js API server & MongoDB Atlas integration
+├── ai-service/                # Python multimodal analysis service
+└── README.md                  # Project documentation
 ```
 
----
+## Local Setup & Installation
 
-## Environment Variables & Cloud Setup
+### 1. Clone the Repository
 
-### 1. MongoDB Atlas
-* Active cluster (`Cluster0`) with `0.0.0.0/0` allowed in **Network Access** so cloud-hosted backend instances can connect.
+```bash
+git clone [https://github.com/Dharmendra7878/mcd-dfusion-inspector.git](https://github.com/Dharmendra7878/mcd-dfusion-inspector.git)
+cd mcd-dfusion-inspector
+```
 
-### 2. Render — Backend (`mcd-dfusion-api`)
-* `MONGO_URI` — MongoDB Atlas connection string (`mongodb+srv://...`)
+### 2. AI Service Setup (Python)
 
-### 3. Vercel — Frontend (`mcd-dfusion-inspector`)
-* **Root Directory**: `frontend`
-* **Framework Preset**: `Vite`
-* `VITE_AI_API_URL` — `https://mcd-dfusion-ai.onrender.com`
-* `VITE_API_URL` — `https://mcd-dfusion-api.onrender.com/api`
+```bash
+cd ai-service
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
 
----
+### 3. Backend Setup (Node.js)
 
-## Known Notes & Pending Fix
+```bash
+cd backend
+npm install
+```
 
-* **Render Free Tier Cold Starts**: Free instances on Render may spin down during inactivity, causing the first request after idle time to take ~30–50 seconds.
-* **AI Service CORS Configuration**: Calls from `https://mcd-dfusion-inspector.vercel.app` to `https://mcd-dfusion-ai.onrender.com/analyze` require `https://mcd-dfusion-inspector.vercel.app` to be explicitly allowed in the `ai-service` CORS configuration, followed by a redeploy on Render.
+Create a `.env` file in `backend/` with your MongoDB connection string:
 
----
+```env
+MONGO_URI=your_mongodb_atlas_connection_string
+```
 
-## Local Development
+Start the backend server:
 
-1. **Clone the repository**
-   ```bash
-   git clone [https://github.com/Dharmendra7878/mcd-dfusion-inspector.git](https://github.com/Dharmendra7878/mcd-dfusion-inspector.git)
-   cd mcd-dfusion-inspector
-   ```
-2. **Start the AI Service (`ai-service/`)**
-   * Install Python dependencies and start the server locally.
-3. **Start the Backend (`backend/`)**
-   * Configure `MONGO_URI` in `backend/.env`, install dependencies (`npm install`), and run `npm start`.
-4. **Start the Frontend (`frontend/`)**
-   * Configure `VITE_AI_API_URL` and `VITE_API_URL` in `frontend/.env`, install dependencies (`npm install`), and run the Vite dev server.
+```bash
+npm start
+```
+
+### 4. Frontend Setup (React + Vite)
+
+```bash
+cd frontend
+npm install
+```
+
+Create a `.env` file in `frontend/` pointing to your API and AI endpoints:
+
+```env
+VITE_AI_API_URL=[https://mcd-dfusion-ai.onrender.com](https://mcd-dfusion-ai.onrender.com)
+VITE_API_URL=[https://mcd-dfusion-api.onrender.com/api](https://mcd-dfusion-api.onrender.com/api)
+```
+
+Start the frontend development server:
+
+```bash
+npm run dev
+```
+
+## Environment Variables & Operational Notes
+
+* **MongoDB Atlas Network Access**: Whitelist `0.0.0.0/0` (or required cloud IPs) in MongoDB Atlas Network Access so Render can connect to the cluster.
+* **Render Free Tier Cold Starts**: Free instances on Render may spin down after inactivity, which can delay initial requests by ~30–50 seconds.
+* **CORS Configuration**: Ensure `https://mcd-dfusion-inspector.vercel.app` is allowed in the `ai-service` CORS settings whenever updating cross-origin rules.
+
+## Author & Acknowledgments
+
+* **Developer**: Dharmendra Paroda ([GitHub](https://github.com/Dharmendra7878))
+* **Research Inspiration**: Associate Professor 张留美 (Liumei Zhang) and the multimodal sentiment analysis research community for foundational work in this domain.
